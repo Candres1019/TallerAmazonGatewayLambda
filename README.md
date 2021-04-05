@@ -30,10 +30,11 @@ La arquitectura del aplicativo se basa en el siguiente modelo:
 
 ![](./Img/arquitectura.png)
 
-La arquitectura de este archivo se basa en la comunicación entre servicios de AWS los cuales son S3, APi GateWay y EC2,
-en los cuales se tienen un servicio public que será el encargado de ser mostrado al usuario y de mostrar los resultados
-de una manera amigable, el segundo el cual hara de comunicador entre el servicio 1 y 3 y finalmente él ultimó servicio
-en el cual hay contenedor Docker corriendo con el framework Spark y la capa lógica de conversion entre grados.
+La arquitectura de este archivo se basa en la comunicación entre servicios de AWS los cuales son S3, API GateWay y EC2,
+en los cuales se tienen un servicio público que será mostrado al usuario y el cual mostrara los resultados al usuario de
+una manera amigable, el segundo el cual hará de comunicador entre el servicio 1 y 3 y finalmente él ultimó servicio en
+el cual hay contenedor Docker corriendo con el framework Spark y la capa lógica de conversión de grados.
+
 
 ### Instalación Capa Lógica
 
