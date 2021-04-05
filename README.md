@@ -1,21 +1,12 @@
 # Taller Amazon Gateway y Lambda
 
-Aplicativo Web diseñado en Java haciendo uso del framework Spark con el objetivo de realizar la implementación y uso de
-certificados SSL y el uso del protocolo HTTPS, con una arquitectura basada en 2 nodos que se comunicaran entre sí
-haciendo uso de estos certificados (SSL), uno de ellos encargado de prestar un servicio el cual en este caso es una
-calculadora encargada de retornar la media y la desviación estándar de un conjunto n de datos, y el segundo nodo
-encargado de enviar al primero la cadena de datos con la cual este va a trabajar y de brindar adicionalmente un soporte
-a usuarios, los cuales serán capaces de hacer login y hacer logout, este nodo además será el encargado de llevar un
-control sobre las sesiones de estos usuarios y de encriptar las contraseñas de los mismos.
+Aplicativo web que transforma de grados Fahrenheit a celsius, el cual la parte abierta al usuario fue desplegada en el
+servicio de archivos estáticos S3 de AWS, y la capa lógica fue puesta en un contenedor Docker y desplegada en el
+servicio EC2, esto debido a la arquitectura dada del proyecto.
 
 ## Información Del Proyecto
 
 * La documentación del las clases y los métodos del proyecto se encuentran en el directorio adjunto /Javadoc/apidocs.
-* Las credenciales de el usuario quemado en el código es:
-
-  > Usuario: admin
-  >
-  > Contraseña: admin@1019
 
 ### Pre-Requisitos
 
@@ -29,84 +20,58 @@ Adicionalmente se recomienda tener descargado los siguientes programas:
 
 > * [Como Instalar Git](http://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
-### Video del despliegue en AWS
+### Video del despliegue y funcionamiento en AWS
 
-[![Deployed to AWS](./Img/aws.png)](https://www.youtube.com/watch?v=Q9Yq7MxHnko)
-
-### Calidad del código
-
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6cbbe30255fe4ac4a3d48264e5b6c25a)](https://www.codacy.com/gh/Candres1019/TallerArquitecturaSegura/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Candres1019/TallerArquitecturaSegura&amp;utm_campaign=Badge_Grade)
-
-### Integración Continua
-
-[![CircleCI](https://circleci.com/gh/Candres1019/TallerArquitecturaSegura.svg?style=svg)](https://app.circleci.com/pipelines/github/Candres1019/TallerArquitecturaSegura)
+[![Deployed to AWS](./Img/youtube.png)](https://www.youtube.com/watch?v=xQPOAP5QU44)
 
 ### Arquitectura
 
 La arquitectura del aplicativo se basa en el siguiente modelo:
 
-![](./Img/Arquitectura.png)
+![](./Img/arquitectura.png)
 
-La arquitectura de la seguridad de este aplicativo se basa esencialmente en el uso de certificados web, con el cual sé
-mantiene un control estricto de los servicios a los cuales se puede acceder de manera local y remota, esto permite tener
-un control sobre que servicios se están ofreciendo y consumiendo internamente, además de poder guardar los servicios que
-no queremos que sean expuestos, como se puede visualizar en el diagrama de la arquitectura cada servicio ofrecido ase
-uso de sus propios "KeyStore" y "TrustStore".
+La arquitectura de este archivo se basa en la comunicación entre servicios de AWS los cuales son S3, APi GateWay y EC2,
+en los cuales se tienen un servicio public que será el encargado de ser mostrado al usuario y de mostrar los resultados
+de una manera amigable, el segundo el cual hara de comunicador entre el servicio 1 y 3 y finalmente él ultimó servicio
+en el cual hay contenedor Docker corriendo con el framework Spark y la capa lógica de conversion entre grados.
 
-En él [directorio](./keystores) se encuentran almacenados los certificados y los TrustStore de los dos servicios
-ofrecidos, la manera más óptima y más fácil de ampliar esta arquitectura es haciendo uso de los mismos, para agregar un
-nuevo servicio, se crearían "KeyStore" y "TrustStore" nuevos para cada servicio y agregando los certificados que
-correspondan a cada uno de ellos.
+### Instalación Capa Lógica
 
-Por último y como segundo nivel de seguridad se tiene un servicio de login el cual bloquea el uso de servicios si no sé
-encuentra una sesión activada, además de esto cifra las contraseñas de los usuarios haciendo uso de la función Hash
-SHA256
+Nota: Si desea simplemente descargar el contenedor con la ultima version modificada y subida a Dockerhub haga
+click [aquí](https://hub.docker.com/repository/docker/candres1019/degreesservicedocker) para ir a la imagen.
 
-### Instalación
+* Si va a usar la imagen del proyecto desplegada en DockerHub solamente debe ejecutar el siguiente comando:
 
-Nota: Para la instalación debe estar corriendo de manera correcta Docker
+  > ```
+  > docker run -d -p 42001:6000 --name {CualquierNombre} candres1019/degreesservicedocker
+  > ```
 
-1. Clonación o Descarga del Proyecto:
+
+1. Clonación del Proyecto:
+
+   Nota: Él UI del proyecto se encuentra en el directorio /StaticWebpage
 
     * Para **Clonar** el proyecto utilice el siguiente comando en la ventana de comandos:
 
    > ```
-   > git clone https://github.com/Candres1019/TallerArquitecturaSegura.git
+   > https://github.com/Candres1019/TallerAmazonGatewayLambda.git
    > ```
 
-    * Para **Descargar** el proyecto de
-      click [aquí](https://github.com/Candres1019/TallerArquitecturaSegura/archive/refs/heads/main.zip), la descarga
-      comenzará de manera automática.
-
-   > Debería visualizar algo como lo siguiente:
-   >
-   > ![](./Img/Ins1.png)
-
-2. En una ventana de comandos ejecuté el siguiente comando, dentro de la carpeta principal del proyecto:
+2. En una ventana de comandos ejecuté el siguiente comando, dentro del directorio /ConverterService.
 
    > ```
     > mvn package
     > ```
 
-   > Debería visualizar algo como lo siguiente:
-   >
-   > ![](./Img/Ins2.png)
 
-
-3. Para ejecutar la aplicación de manera local utilizamos en la ventana de comandos el siguiente comando dentro del
-   directorio DockerFiles:
+3. Para ejecutar la aplicación de manera local utilizamos en la ventana de comando los siguientes comandos dentro del
+   directorio "/ConverterService":
 
    > ```
-    > docker-compose up -d
+    > docker build --tag {cualquiernombre} .
+    > docker run -d -p 42001:6000 --name {cualquiernombrediferente} {cualquiernombre}
     > ```
 
-   > Debería visualizar algo como lo siguiente al inicio de la ejecución:
-   >
-   > ![](./Img/Ins3_1.png)
-   >
-   > Debería visualizar algo como lo siguiente al final de la ejecución:
-   >
-   > ![](./Img/Ins3_2.png)
 
 4. Para verificar que todo esté funcionando de manera correcta ejecutamos el siguiente comando:
 
@@ -114,24 +79,19 @@ Nota: Para la instalación debe estar corriendo de manera correcta Docker
     > docker ps
     > ```
 
-   > Debería visualizar lo siguiente:
-   >
-   > ![](./Img/Ins4.png)
-
-5. Para ver el aplicativo web de manera local ingresamos al siguiente enlace (Se recomienda usar firefox):
+5. Para utilizar la API debe acceder al siguiente path si fue utilizado de manera local, de lo contrario utilice el
+   asignado por su servidor.
 
    > ```
-    > https://localhost:5000/
+    > http://localhost:42001/convert/fahrenheit/celsius?value={numero}
     > ```
 
-   > Debería visualizar lo siguiente:
-   >
-   > ![](./Img/Ins5.png)
+## Generación de Documentación
 
-6. Por defecto se creó la documentación JavaDoc y fue dejada en el directorio /Javadoc, si desea generar uno nuevo
-   utilice el siguiente comando, esta documentación quedará en el directorio /target/site/apidocs :
+Por defecto se creó la documentación JavaDoc y fue dejada en el directorio /Javadoc, si desea generar uno nuevo utilice
+el siguiente comando, esta documentación quedará en el directorio /target/site/apidocs :
 
-   > ```
+> ```
    > mvn javadoc:javadoc
    > ```
 
@@ -143,12 +103,17 @@ En una ventana de comandos, utilice el siguiente comando:
     mvn test
    ```
 
+> Reporte de Pruebas:
+>
+> ![](./Img/reportePruebas.png)
+
 ## Construido Con
 
 * [Java](https://www.java.com/es/) - Lenguaje de Programación.
 * [JUnit](https://junit.org/junit5/) - Pruebas de Unidad.
 * [Maven](https://maven.apache.org/) - Manejo de dependencias.
 * [IntelliJ IDEA](https://www.jetbrains.com/es-es/idea/) - Entorno de Desarrollo.
+* [AWS](https://aws.amazon.com/es/) - Despliegue en la nube.
 
 ## Authors
 
@@ -156,4 +121,4 @@ En una ventana de comandos, utilice el siguiente comando:
 
 # Licencia
 
-Este proyecto está licenciado bajo la GNU v3.0 - ver el archivo [LICENSE](./LICENSE) para más detalles.
+Este proyecto está licenciado bajo el GNU v3.0 - ver el archivo [LICENSE](./LICENSE) para más detalles.
